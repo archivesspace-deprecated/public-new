@@ -3,3 +3,4 @@
 /build/jruby-complete-*.jar
 /build/.bundle/
 /build/.gem/
+/build/devserver.sh
