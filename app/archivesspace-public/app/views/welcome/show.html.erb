@@ -1,0 +1,20 @@
+
+<div class="row">
+  <div class="col-sm-12">
+    <h2><%= t('brand.welcome_head') %></h2>
+      <div><%= t('brand.welcome_message').html_safe %> </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <p>
+    You could do a keyword search if you like:
+
+    <%= form_tag('/search', method: 'get') do %>
+        <%= text_field_tag(:q) %>
+        <%= submit_tag(I18n.t('search-button.label')) %>
+    <% end %>
+    </p>
+
+  </div>
+</div>

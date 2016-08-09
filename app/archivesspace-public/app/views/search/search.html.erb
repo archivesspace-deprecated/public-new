@@ -1,22 +1,13 @@
-<p>Showing results <%= @results['offset_first'] %> to <%= @results['offset_last'] %> of <%= @results['total_hits'] %></p>
+<div class="row">
+<div class="col-sm-9">
+<p><%= "#{I18n.t('pagination.summary_prefix')} #{I18n.t('pagination.summary_suffix')}" %> <%= @results['offset_first'] %> 
+<%= t('pagination.summary_offset_connector') %> <%= @results['offset_last'] %> <%= t('pagination.summary_total_connector') %> <%= @results['total_hits'] %></p>
 
-<ul>
     <% @results['results'].each do |result| %>
-        <li><%= result['primary_type'] %> - <%= result['title'] %></li>
-    <% end %>
-</ul>
+    <%= render partial: 'shared/result', locals: {:result => result, :full => false} %>
 
-<div class="ugly-pagination">
-    <% @pages.each do |page| %>
-        <% if page == @results['this_page']%>
-            <strong><%= page %></strong>
-        <% else %>
-            <%= link_to(page.to_s, {
-                controller: :search,
-                action: :search,
-                q: @query,
-                page: page
-            }) %>
-        <% end %>
     <% end %>
+
+<%= render partial: 'shared/pagination', locals: {:pager  => @pager}  %>
+</div>
 </div>
