@@ -21,7 +21,6 @@ class SearchController < ApplicationController
     page = Integer(params.fetch(:page, "1"))
     Rails.logger.debug("base search: #{@base_search}")
     Rails.logger.debug("query: #{@query}")
-   
     @results = archivesspace.advanced_search(@base_search, page, @criteria)
     if @results['total_hits'].blank? ||  @results['total_hits'] == 0
       flash[:notice] = "#{I18n.t('search_results.no_results')} #{I18n.t('search_results.head_prefix')}"
