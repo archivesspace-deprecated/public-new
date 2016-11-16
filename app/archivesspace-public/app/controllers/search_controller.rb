@@ -11,8 +11,14 @@ class SearchController < ApplicationController
 
   def search
     @base_search = "/search?"
+    simple_search = false
     begin
-      set_up_advanced_search(DEFAULT_TYPES, DEFAULT_SEARCH_FACET_TYPES, DEFAULT_SEARCH_OPTS, params)
+      if params.fetch(:recordtypes,nil)
+        set_up_search(DEFAULT_TYPES, DEFAULT_SEARCH_FACET_TYPES, DEFAULT_SEARCH_OPTS, params)
+        simple_search = true
+      else
+        set_up_advanced_search(DEFAULT_TYPES, DEFAULT_SEARCH_FACET_TYPES, DEFAULT_SEARCH_OPTS, params)
+      end
 #NOTE the redirect back here on error!
     rescue Exception => error
       flash[:error] = error
@@ -21,7 +27,12 @@ class SearchController < ApplicationController
     page = Integer(params.fetch(:page, "1"))
     Rails.logger.debug("base search: #{@base_search}")
     Rails.logger.debug("query: #{@query}")
-    @results = archivesspace.advanced_search(@base_search, page, @criteria)
+    @results = {}
+    if simple_search
+      @results = archivesspace.search(@query, page, @criteria)
+    else 
+      @results =  archivesspace.advanced_search(@base_search, page, @criteria)
+    end
     if @results['total_hits'].blank? ||  @results['total_hits'] == 0
       flash[:notice] = "#{I18n.t('search_results.no_results')} #{I18n.t('search_results.head_prefix')}"
       redirect_back(fallback_location: @base_search)
