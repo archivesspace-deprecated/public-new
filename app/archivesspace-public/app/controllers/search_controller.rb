@@ -10,9 +10,12 @@ class SearchController < ApplicationController
 
 
   def search
-    @base_search = "/search?"
-    simple_search = false
+    repo_id = params.fetch(:rid, nil)
+    repo_url = "/repositories/#{repo_id}"
+    @base_search =  repo_id ? "#{repo_url}/search?" : '/search?'
+
     search_opts = default_search_opts(DEFAULT_SEARCH_OPTS)
+    search_opts['fq'] = ["repository:\"#{repo_url}\" OR used_within_repository::\"#{repo_url}\""] if repo_id
     begin
       set_up_advanced_search(DEFAULT_TYPES, DEFAULT_SEARCH_FACET_TYPES, search_opts, params)
 #NOTE the redirect back here on error!
@@ -24,11 +27,7 @@ class SearchController < ApplicationController
     Rails.logger.debug("base search: #{@base_search}")
     Rails.logger.debug("query: #{@query}")
     @results = {}
-    if simple_search
-      @results = archivesspace.search(@query, page, @criteria)
-    else 
-      @results =  archivesspace.advanced_search(@base_search, page, @criteria)
-    end
+    @results =  archivesspace.advanced_search(@base_search, page, @criteria)
     if @results['total_hits'].blank? ||  @results['total_hits'] == 0
       flash[:notice] = "#{I18n.t('search_results.no_results')} #{I18n.t('search_results.head_prefix')}"
       redirect_back(fallback_location: @base_search)
