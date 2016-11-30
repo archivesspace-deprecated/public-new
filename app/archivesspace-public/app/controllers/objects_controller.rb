@@ -67,9 +67,17 @@ class ObjectsController <  ApplicationController
  
   def show
     uri = "/repositories/#{params[:rid]}/#{params[:obj_type]}/#{params[:id]}"
+
+    pui_uri = if params[:obj_type] == 'archival_objects'
+                # Fetch the record version that includes inheritance information (delineated by the '#pui' suffix)
+                uri + '#pui'
+              else
+                uri
+              end
+
     @criteria = {}
     @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id']
-    @results =  archivesspace.search_records([uri],1,@criteria)
+    @results =  archivesspace.search_records([pui_uri],1,@criteria)
     @results =  handle_results(@results)
     if !@results['results'].blank? && @results['results'].length > 0
       @result = @results['results'][0]
