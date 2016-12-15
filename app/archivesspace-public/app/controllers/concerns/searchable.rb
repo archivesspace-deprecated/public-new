@@ -80,7 +80,8 @@ module Searchable
     have_query = false
     advanced_query_builder = AdvancedQueryBuilder.new
     @search[:q].each_with_index { |query, i|
-      query = '*' if query.blank?
+      query = quote_encode_query(query)
+      Rails.logger.debug("QUERY: #{query}")
       have_query = true
       op = @search[:op][i]
       field = @search[:field][i].blank? ? 'keyword' :  @search[:field][i]
@@ -106,7 +107,7 @@ module Searchable
 
    # any  search within results? 
     @search[:filter_q].each do |v|
-      value = v == '' ? '*' : v
+      value = quote_encode_query(v)
       advanced_query_builder.and('keyword', value, 'text', false)
     end
      # we have to add filtered dates, if they exist
@@ -345,6 +346,23 @@ module Searchable
 
   private
   
+  #put quotation marks around query strings that have some punctuation
+  def quote_encode_query(in_query)
+    query = in_query.blank? ? '*' : in_query
+    unless !query.match(/[:\-]/) || query.match(/^".+"$/)
+      qry = ' '
+      query.split(' ').each do |q|
+        if q.match(/[:\-]/) && !q.match(/^".+"$/)
+          qry << %("#{q}" )
+        else
+          qry << q << " "
+        end
+      end
+      query = qry.strip
+    end
+    query
+  end
+
   # creates the html-ized search statement
   def set_search_statement
     rid = defined?(@repo_id) ? @repo_id : nil
