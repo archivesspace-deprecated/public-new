@@ -71,7 +71,7 @@ class AccessionsController <  ApplicationController
   def show
     uri = "/repositories/#{params[:rid]}/accessions/#{params[:id]}"
     @criteria = {}
-    @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource']
+    @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'related_resource_uris:id']
     @results =  archivesspace.search_records([uri],1,@criteria)
     @results =  handle_results(@results)
     if !@results['results'].blank? && @results['results'].length > 0
@@ -83,6 +83,7 @@ class AccessionsController <  ApplicationController
       @context.push({:uri => '', :crumb => @result['json']['title'] })
       @subjects = process_subjects(@result['json']['subjects'])
       @agents = process_agents(@result['json']['linked_agents'], @subjects)
+      @related_resources = process_related_resources(@result)
       process_extents(@result['json'])
     else
       @type = I18n.t('accession._singular')
@@ -91,5 +92,15 @@ class AccessionsController <  ApplicationController
       @back_url = request.referer || ''
       render  'shared/not_found'
     end
+  end
+
+  private
+
+  def process_related_resources(result)
+    result['related_resource_uris'].collect{|uri|
+      result['_resolved_related_resource_uris'][uri].first
+    }.select{|resource|
+      resource['publish']
+    }
   end
 end

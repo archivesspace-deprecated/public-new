@@ -1,0 +1,17 @@
+<h4><%= t('resource._public.related_accessions.accessions') %></h4>
+<ul>
+<% accessions.each do |accession| %>
+  <li>
+    <%= link_to accession['title'], accession['uri'] %>
+  </li>
+<% end %>
+</ul>
+
+<% unless deaccessions.empty? %>
+<h4><%= t('resource._public.related_accessions.deaccessions') %></h4>
+<ul>
+<% deaccessions.each do |deaccession| %>
+  <li><%= deaccession['description'] %></li>
+<% end %>
+</ul>
+<% end %>

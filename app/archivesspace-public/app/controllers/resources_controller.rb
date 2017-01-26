@@ -133,7 +133,7 @@ class ResourcesController <  ApplicationController
     uri = "/repositories/#{params[:rid]}/resources/#{params[:id]}"
     record_list = [uri]
     @criteria = {}
-    @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id']
+    @criteria['resolve[]']  = ['repository:id', 'resource:id@compact_resource', 'top_container_uri_u_sstr:id', 'related_accession_uris:id']
     @results =  archivesspace.search_records(record_list,1, @criteria) || {}
     @results = handle_results(@results)  # this should process all notes
     if !@results['results'].blank? && @results['results'].length > 0
@@ -154,6 +154,7 @@ class ResourcesController <  ApplicationController
       @subjects = process_subjects(@result['json']['subjects'])
       @agents = process_agents(@result['json']['linked_agents'], @subjects)
       @finding_aid = process_finding_aid(@result['json'])
+      @related_accessions, @related_accession_deaccessions = process_related_accessions(@result)
 
       @page_title = "#{I18n.t('resource._singular')}: #{strip_mixed_content(@result['json']['title'])}"
       @context = [{:uri => @repo_info['top']['uri'], :crumb => @repo_info['top']['name']}, {:uri => nil, :crumb => process_mixed_content(@result['json']['title'])}]
@@ -192,5 +193,21 @@ class ResourcesController <  ApplicationController
       end
     end
     fa
+  end
+
+  def process_related_accessions(result)
+    accessions = result['related_accession_uris'].collect{|uri|
+      result['_resolved_related_accession_uris'][uri].first
+    }.select{|accession|
+      accession['publish']
+    }
+
+    deaccessions = []
+    accessions.each{|accession|
+      full_record = JSON.parse(accession['json'])
+      deaccessions.concat(Array(full_record['deaccessions']))
+    }
+
+    [accessions, deaccessions]
   end
 end

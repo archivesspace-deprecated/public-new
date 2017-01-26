@@ -1,0 +1,7 @@
+<ul>
+<% resources.each do |resource| %>
+  <li>
+    <%= link_to resource['title'], resource['uri'] %>
+  </li>
+<% end %>
+</ul>

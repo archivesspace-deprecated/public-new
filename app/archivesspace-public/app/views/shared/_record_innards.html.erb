@@ -68,6 +68,14 @@
 	    <%= render partial: 'shared/accordion_panel', locals: {:p_title =>  t('repository.details'), 
 	    :p_id => 'repo_deets', :p_body => x} %>
         <% end %>
+        <% unless @related_accessions.blank? %>
+          <% x = render partial: 'resources/related_accessions', locals: {:accessions => @related_accessions, :deaccessions => @related_accession_deaccessions} %>
+          <%= render partial: 'shared/accordion_panel', locals: {:p_title => t('related_accessions'), :p_id => 'related_accessions_list', :p_body => x} %>
+        <% end %>
+        <% unless @related_resources.blank? %>
+          <% x = render partial: 'accessions/related_resources', locals: {:resources => @related_resources} %>
+          <%= render partial: 'shared/accordion_panel', locals: {:p_title => t('related_resources'), :p_id => 'related_resources_list', :p_body => x} %>
+        <% end %>
       </div>        
     </div>
     <script type="text/javascript" >initialize_accordion(".note_panel", "<%= t('accordion.expand') %>" , "<%= t('accordion.collapse') %>");
